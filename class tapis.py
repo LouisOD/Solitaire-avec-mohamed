@@ -1,20 +1,30 @@
 # Créé par basrirm, le 28/11/2023 en Python 3.7
 class Tapis:
     def __init__(self):
-     self.cartes_en_jeu = [] #attribut cartes_en_jeu qui est une liste vide. il  stocke les cartes posées sur le tapis
+        self.cartes_en_jeu = deque() # File pour les cartes en jeu
+        self.paquet_bataille = deque() # Pile pour les cartes dans la  bataille
 
-    def poser_carte(self, carte): #pose une carte sur le tapis. Prend une carte en argument
-        self.cartes_en_jeu.append(carte) #Ajoute la carte à la liste cartes_en_jeu
+    def poser_carte(self, joueur):
+        if joueur.PaquetJoueur:
+            return joueur.PaquetJoueur.popleft()  # Prendre la carte du dessus sur le  paquet du joueur
+        else:
+            return None
 
-    def recuperer_cartes(self):#récupére toutes les cartes du tapis
-        cartes = self.cartes_en_jeu.copy() #Copie la liste des cartes sur le tapis dans une nouvelle liste appelée cartes
-        self.cartes_en_jeu.clear() # Vide la liste des cartes sur le tapis
-        return cartes # Renvoie  la copie des cartes récupérées
+    def comparer_cartes(self, PaquetJoueur1, PaquetJoueur2):
+        while PaquetJoueur1.PaquetJoueur and PaquetJoueur2.PaquetJoueur:
+            # Comparaison des cartes et gestion de la bataille
+            carte_joueur1 = self.poser_carte(PaquetJoueur1)
+            carte_joueur2 = self.poser_carte(PaquetJoueur2)
 
-    def afficher_tapis(self): #affiche les cartes actuellement sur le tapis
-        if self.cartes_en_jeu: # sa Vérifie si la liste cartes_en_jeu n'est pas vide
-            print("Cartes sur le tapis:") # indique bien que les cartes sont sur la tapis
-            for carte in self.cartes_en_jeu: #Boucle qui  traverse tt les cartes sur le tapis
-                print(f"{carte.get_nom()} de {carte.get_couleur()}") #  donne  le nom et la couleur de chaque carte sur une nouvelle ligne
-        else: # sinon exécuté si la liste cartes_en_jeu est vide
-            print("Le tapis est vide.")
+            if carte_joueur1 is not None and carte_joueur2 is not None:
+                if carte_joueur1.get_valeur() > carte_joueur2.get_valeur():
+                    self.recuperer_cartes(PaquetJoueur1)
+                else:
+                    self.recuperer_cartes(PaquetJoueur2)
+
+    def recuperer_cartes(self, gagnant):
+         # Récupération des cartes dans le paquet du gagnant et la pile de la  bataille
+        self.cartes_en_jeu.extend(gagnant.PaquetJoueur)
+        self.cartes_en_jeu.extend(self.paquet_bataille)
+        gagnant.PaquetJoueur.clear()
+        self.paquet_bataille.clear()
